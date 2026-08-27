@@ -1,0 +1,27 @@
+subnets_config = {
+  "public-us-east-1a" = {
+    cidr_block        = "172.16.0.0/23"
+    availability_zone = "us-east-1a"
+    is_public          = true
+  }
+  "public-us-east-1b" = {
+    cidr_block        = "172.16.2.0/23"
+    availability_zone = "us-east-1b"
+    is_public          = true
+  }
+  "private-us-east-1a" = {
+    cidr_block        = "172.16.4.0/23"
+    availability_zone = "us-east-1a"
+    is_public          = false
+  }
+}
+bastion_enable = false
+bastion_ports = {
+  "ssh" = 22
+}
+web_ports = {
+  "https" = 443
+  "http"  = 80
+}
+key_name     = "tu-key-pair-aqui"
+alert_emails = ["tu-email@ejemplo.com"]

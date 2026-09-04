@@ -45,10 +45,5 @@ jobs:
       - name: Terraform Validate
         id: step6
         run: terraform validate
-
-
-
-
-
       - name: terraform plan
         run: terraform plan

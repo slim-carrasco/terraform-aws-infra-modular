@@ -1,0 +1,54 @@
+name: Terraform Plan
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "infra/**"
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  terraform-plan:
+    defaults:
+      run:
+        working-directory: infra
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        id: step1
+        uses: actions/checkout@v7
+      - name: Configurar credenciales AWS con OIDC
+        id: step2
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: us-east-1
+      - name: Terraform Version
+        id: terraform-version
+        run: |
+          VERSION=$(cat .terraform-version | tr -d '[:space:]')
+          echo "tf_version=$VERSION" >> $GITHUB_OUTPUT
+      - name: Setup Terraform
+        id: step3
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ steps.terraform-version.outputs.tf_version }}
+      - name: Terraform Check
+        id: step4
+        run: terraform fmt -check
+
+      - name: Terraform Init
+        run: terraform init
+        id: step5
+      - name: Terraform Validate
+        id: step6
+        run: terraform validate
+
+
+
+
+
+      - name: terraform plan
+        run: terraform plan

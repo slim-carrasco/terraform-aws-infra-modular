@@ -38,7 +38,10 @@ jobs:
       - name: Terraform Check
         id: step4
         run: terraform fmt -check
-
+      - name: Tfvars
+        id: create_tfvars_file
+        run: |
+          echo "${{ secrets.TFVARS }}" > terraform.tfvars
       - name: Terraform Init
         run: terraform init
         id: step5

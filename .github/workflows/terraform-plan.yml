@@ -41,7 +41,9 @@ jobs:
       - name: Tfvars
         id: create_tfvars_file
         run: |
-          echo "${{ secrets.TFVARS }}" > terraform.tfvars
+          cat << EOF > terraform.tfvars
+          ${{ secrets.TFVARS }} 
+          EOF
       - name: Terraform Init
         run: terraform init
         id: step5

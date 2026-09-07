@@ -1,6 +1,3 @@
-
-
-
 variable "alert_emails" {
   type = list(string)
 
@@ -16,7 +13,7 @@ variable "web_ports" {
   type = map(number)
 }
 variable "environment" {
-  type = string
+  type    = string
   default = "prod"
 }
 
@@ -40,5 +37,5 @@ variable "subnets_config" {
 variable "key_name" {
 
 
-type=string
+  type = string
 }

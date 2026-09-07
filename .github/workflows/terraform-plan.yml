@@ -45,10 +45,10 @@ jobs:
           ${{ secrets.TFVARS }} 
           EOF
       - name: Terraform Init
-        run: terraform init
+        run: terraform init -input=false
         id: step5
       - name: Terraform Validate
         id: step6
-        run: terraform validate
+        run: terraform validate 
       - name: terraform plan
-        run: terraform plan
+        run: terraform plan -input=false

@@ -58,3 +58,42 @@ jobs:
           name: tfplan-artifact
           path: "infra/tfplan"
           retention-days: 1
+
+
+  terraform-apply:
+    needs: terraform-plan
+    environment: production
+    defaults:
+      run:
+        working-directory: infra
+    runs-on: ubuntu-latest
+
+    
+    steps:
+      - name: Checkout
+        id: step0
+        uses: actions/checkout@v7
+      - name: Download
+        id: step1
+        uses: actions/download-artifact@v4
+        with:
+          name: tfplan-artifact
+          path: "infra/"
+      - name: Configure Credentials AWS
+        id: step2
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN_APPLY }}
+          aws-region: us-east-1
+      - name: Tfvars
+        id: step4
+        run: |
+          cat << EOF > terraform.tfvars
+          ${{ secrets.TFVARS }}
+          EOF
+      - name: Terraform init
+        id: step5
+        run: terraform init -input=false
+      - name: Terraform Apply
+        id: step6
+        run: terraform apply tfplan

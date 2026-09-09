@@ -85,6 +85,10 @@ jobs:
         with:
           role-to-assume: ${{ vars.AWS_ROLE_ARN_APPLY }}
           aws-region: us-east-1
+      - name: Terraform setuppp
+        uses: hashicorp/setup-terraform@v4
+        with:
+          terraform-version: "1.16.1"
       - name: Tfvars
         id: step4
         run: |

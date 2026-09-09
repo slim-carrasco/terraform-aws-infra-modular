@@ -88,7 +88,7 @@ jobs:
       - name: Terraform setuppp
         uses: hashicorp/setup-terraform@v4
         with:
-          terraform-version: "1.15.6"
+          terraform_version: "1.15.6"
       - name: Tfvars
         id: step4
         run: |

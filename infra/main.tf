@@ -1,4 +1,4 @@
-##prueba workflow plan y apply con ruta infra/tfplan en apply
+##prueba workflow apply y plan
 
 module "security" {
   source         = "./modules/security"

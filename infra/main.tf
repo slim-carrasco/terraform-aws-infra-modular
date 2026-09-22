@@ -1,4 +1,4 @@
-##prueba workflow apply
+##prueba workflow plan
 
 module "security" {
   source         = "./modules/security"

@@ -3,3 +3,4 @@
 *.tfstate.*
 *.tfvars
 crash.log
+.github/workflows/terraform-plan.yml.save

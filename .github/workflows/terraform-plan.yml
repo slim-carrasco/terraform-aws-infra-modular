@@ -1,0 +1,121 @@
+name: Terraform Plan
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "infra/**"
+permissions:
+  id-token: write
+  contents: read
+  pull-request: write
+jobs:
+  terraform-plan:
+    defaults:
+      run:
+        working-directory: infra
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        id: step1
+        uses: actions/checkout@v7
+      - name: Configurar credenciales AWS con OIDC
+        id: step2
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: us-east-1
+      - name: Terraform Version
+        id: terraform-version
+        run: |
+          VERSION=$(cat .terraform-version | tr -d '[:space:]')
+          echo "tf_version=$VERSION" >> $GITHUB_OUTPUT
+      - name: Setup Terraform
+        id: step3
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ steps.terraform-version.outputs.tf_version }}
+      - name: Terraform Check
+        id: step4
+        run: terraform fmt -check
+      - name: Tfvars
+        id: create_tfvars_file
+        run: |
+          cat << EOF > terraform.tfvars
+          ${{ secrets.TFVARS }} 
+          EOF
+      - name: Terraform Init
+        run: terraform init -input=false
+        id: step5
+      - name: Terraform Validate
+        id: step6
+        run: terraform validate 
+      - name: terraform plan
+        id: comentario
+        run: |
+          {
+            echo 'plan<<EOF'
+            terraform plan -no-color -input=false -out=tfplan
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
+      - name: comentario
+        id: coment
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `${{steps.comentario.outputs.plan}}`
+            })
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfplan-artifact
+          path: "infra/tfplan"
+          retention-days: 1
+
+
+  terraform-apply:
+    needs: terraform-plan
+    environment: production
+    defaults:
+      run:
+        working-directory: infra
+    runs-on: ubuntu-latest
+
+    
+    steps:
+      - name: Checkout
+        id: step0
+        uses: actions/checkout@v7
+      - name: Download
+        id: step1
+        uses: actions/download-artifact@v4
+        with:
+          name: tfplan-artifact
+          path: "infra/"
+      - name: Configure Credentials AWS
+        id: step2
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN_APPLY }}
+          aws-region: us-east-1
+      - name: Terraform setuppp
+        uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: "1.15.6"
+      - name: Tfvars
+        id: step4
+        run: |
+          cat << EOF > terraform.tfvars
+          ${{ secrets.TFVARS }}
+          EOF
+      - name: Terraform init
+        id: step5
+        run: terraform init -input=false
+      - name: Terraform Apply
+        id: step6
+        run: terraform apply tfplan
